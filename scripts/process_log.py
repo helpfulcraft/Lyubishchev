@@ -31,8 +31,8 @@ def minutes_to_time_str(minutes):
     else:
         return f"{mins}m"
 
-def parse_log_file(file_path):
-    """解析日志文件，计算时间总和，并提取详细的任务条目和日期。"""
+def parse_log_content(log_content):
+    """解析日志内容，计算时间总和，并提取详细的任务条目和日期。"""
     # 结构：{ category: { item: { 'total_minutes': total_minutes, 'tasks': [{'name': task_name, 'time_str': time_str}] } } }
     item_details = defaultdict(lambda: defaultdict(lambda: {'total_minutes': 0, 'tasks': []}))
     
@@ -44,66 +44,65 @@ def parse_log_file(file_path):
     category_pattern = re.compile(r'^\s*-\s*([一二三四五六七八九十]+、[\u4e00-\u9fa5]+)\s*$')
     item_pattern = re.compile(r'^\s+-\s*([\u4e00-\u9fa5]+)\s*[\(（](.*)[\)）]\s*$')
     
-    with open(file_path, 'r', encoding='utf-8') as f:
-        for line in f:
-            line_content = line.strip()
-            if not line_content:
-                continue
+    for line in log_content.strip().split('\n'):
+        line_content = line.strip()
+        if not line_content:
+            continue
 
-            # 尝试匹配日期
-            date_match = date_pattern.match(line_content)
-            if date_match:
-                try:
-                    month = int(date_match.group(1))
-                    day = int(date_match.group(2))
-                    current_year = datetime.now().year
-                    log_date = datetime(current_year, month, day)
-                except ValueError:
-                    # 如果日期格式错误，则忽略并使用默认的当天日期
-                    pass
-                continue # 处理完日期行后跳过
+        # 尝试匹配日期
+        date_match = date_pattern.match(line_content)
+        if date_match:
+            try:
+                month = int(date_match.group(1))
+                day = int(date_match.group(2))
+                current_year = datetime.now().year
+                log_date = datetime(current_year, month, day)
+            except ValueError:
+                # 如果日期格式错误，则忽略并使用默认的当天日期
+                pass
+            continue # 处理完日期行后跳过
+        
+        category_match = category_pattern.match(line)
+        if category_match:
+            full_title = category_match.group(1)
+            current_category = full_title.split('、')[1]
+            continue
+
+        item_match = item_pattern.match(line)
+        if item_match and current_category:
+            item_name = item_match.group(1)
+            content = item_match.group(2).strip()
             
-            category_match = category_pattern.match(line)
-            if category_match:
-                full_title = category_match.group(1)
-                current_category = full_title.split('、')[1]
-                continue
+            # 更精细地解析任务和时间
+            # 正则表达式找到所有 "任务名+时间" 的组合
+            # 任务名可以包含空格，但不包含'（'和'）'
+            # 时间是 hh mm 或者 mm 格式
+            pattern = re.compile(r'([\s\S]+?)(?:\s|-)*?(\d+h\d*m?|\d+m)')
+            matches = pattern.findall(content)
 
-            item_match = item_pattern.match(line)
-            if item_match and current_category:
-                item_name = item_match.group(1)
-                content = item_match.group(2).strip()
+            tasks = []
+            # 合并由+连接的同名任务
+            for i, (name, time) in enumerate(matches):
+                task_name = name.strip()
+                if task_name == '+' and tasks:
+                    # 如果任务名是"+"，则将时间添加到上一个任务
+                    tasks[-1]['time_str'] += f"+{time}"
+                else:
+                    tasks.append({'name': task_name, 'time_str': time})
+
+            # 处理 `+` 连接的时间字符串, 例如 "1h+12m"
+            processed_tasks = []
+            for task in tasks:
+                # 将 '17m+28m' 这样的字符串中的时间相加
+                individual_times = re.findall(r'\d+h\d*m?|\d+m', task['time_str'])
+                total_minutes = sum(time_str_to_minutes(ts) for ts in individual_times)
                 
-                # 更精细地解析任务和时间
-                # 正则表达式找到所有 "任务名+时间" 的组合
-                # 任务名可以包含空格，但不包含'（'和'）'
-                # 时间是 hh mm 或者 mm 格式
-                pattern = re.compile(r'([\s\S]+?)(?:\s|-)*?(\d+h\d*m?|\d+m)')
-                matches = pattern.findall(content)
+                if total_minutes > 0:
+                    processed_tasks.append({'name': task['name'], 'minutes': total_minutes})
 
-                tasks = []
-                # 合并由+连接的同名任务
-                for i, (name, time) in enumerate(matches):
-                    task_name = name.strip()
-                    if task_name == '+' and tasks:
-                        # 如果任务名是"+"，则将时间添加到上一个任务
-                        tasks[-1]['time_str'] += f"+{time}"
-                    else:
-                        tasks.append({'name': task_name, 'time_str': time})
-
-                # 处理 `+` 连接的时间字符串, 例如 "1h+12m"
-                processed_tasks = []
-                for task in tasks:
-                    # 将 '17m+28m' 这样的字符串中的时间相加
-                    individual_times = re.findall(r'\d+h\d*m?|\d+m', task['time_str'])
-                    total_minutes = sum(time_str_to_minutes(ts) for ts in individual_times)
-                    
-                    if total_minutes > 0:
-                        processed_tasks.append({'name': task['name'], 'minutes': total_minutes})
-
-                for p_task in processed_tasks:
-                    item_details[current_category][item_name]['tasks'].append(p_task)
-                    item_details[current_category][item_name]['total_minutes'] += p_task['minutes']
+            for p_task in processed_tasks:
+                item_details[current_category][item_name]['tasks'].append(p_task)
+                item_details[current_category][item_name]['total_minutes'] += p_task['minutes']
 
     # --- 计算总计和格式化输出 ---
     final_data = defaultdict(dict)
@@ -195,7 +194,7 @@ def main():
     # 检查日志文件是否存在
     try:
         with open(log_file, 'r', encoding='utf-8') as f:
-            pass
+            log_content = f.read()
         print(f"开始处理 '{log_file}'...")
     except FileNotFoundError:
         print(f"错误：日志文件 '{log_file}' 不存在。")
@@ -217,7 +216,7 @@ def main():
         return
 
     # 解析日志并生成JSON
-    summary_data, log_date = parse_log_file(log_file)
+    summary_data, log_date = parse_log_content(log_content)
     
     # 将结果写入JSON文件
     with open(output_file, 'w', encoding='utf-8') as f:

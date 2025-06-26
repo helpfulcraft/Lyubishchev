@@ -114,6 +114,29 @@ def prepare_stacked_bar_data(df):
         "series": series_data
     }
 
+def prepare_historical_data_from_df(df):
+    """从DataFrame准备历史折线图数据。"""
+    try:
+        df['Date'] = pd.to_datetime(df['Date'])
+        df = df.sort_values('Date')
+
+        pivot_df = df.pivot_table(index='Date', columns='Category', values='Task Duration (minutes)', aggfunc='sum').fillna(0)
+        
+        dates = pivot_df.index.strftime('%Y-%m-%d').tolist()
+        categories = pivot_df.columns.tolist()
+        
+        series = []
+        for category in categories:
+            series.append({
+                "name": category,
+                "type": 'line',
+                "data": pivot_df[category].tolist()
+            })
+            
+        return {"dates": dates, "categories": categories, "series": series}
+    except Exception as e:
+        print(f"从DataFrame准备历史数据时出错: {e}")
+        return None
 
 def main():
     """主函数：解析参数，处理数据，生成周期性报告。"""
@@ -176,6 +199,12 @@ def main():
     grand_total_minutes = period_df['Task Duration (minutes)'].sum()
     generation_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+    # 为周期报告准备与每日报告一致的历史数据和日历数据
+    # 注意：这里的historical_data是为了让模板的折线图部分能复用
+    historical_df = pd.read_csv(csv_file)
+    historical_df['Date'] = pd.to_datetime(historical_df['Date'], format='%Y-%m-%d', errors='coerce')
+    historical_data_for_template = prepare_historical_data_from_df(historical_df)
+
     daily_summary_like = {}
     for cat_data in chart_data:
         daily_summary_like[cat_data['name']] = {"总计": cat_data['value_str']}
@@ -183,6 +212,11 @@ def main():
             daily_summary_like[cat_data['name']][item_data['name']] = item_data['value_str']
     daily_summary_like["总计"] = minutes_to_time_str(grand_total_minutes)
     template_data_for_card = {"daily_summary": daily_summary_like}
+
+    # 为新图表准备数据
+    treemap_data = chart_data
+    streamgraph_data = historical_data_for_template
+    small_multiples_data = historical_data_for_template
 
     # --- 4. 渲染HTML模板 ---
     template_file = 'new_report_template.html'
@@ -199,8 +233,12 @@ def main():
         stacked_bar_data=stacked_bar_data,
         data=template_data_for_card,
         report_period=f"{start_date.strftime('%Y-%m-%d')} to {end_date.strftime('%Y-%m-%d')}",
-        historical_data=None,
-        generation_time=generation_time
+        historical_data=historical_data_for_template,
+        generation_time=generation_time,
+        # 新增图表数据
+        treemap_data=treemap_data,
+        streamgraph_data=streamgraph_data,
+        small_multiples_data=small_multiples_data
     )
     
     if args.output:

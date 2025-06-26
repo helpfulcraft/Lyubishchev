@@ -219,6 +219,13 @@ def main():
     historical_data = prepare_historical_data('data/historical_data.csv')
     generation_time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
+    # 为新图表准备数据
+    # Treemap 数据可以复用旭日图的数据结构
+    treemap_data = chart_data
+    # Streamgraph 和 Small Multiples 可以复用历史数据
+    streamgraph_data = historical_data
+    small_multiples_data = historical_data
+
     env = Environment(loader=FileSystemLoader('templates'))
     template = env.get_template(template_file)
     
@@ -229,7 +236,11 @@ def main():
         pie_data=pie_data,
         stacked_bar_data=stacked_bar_data,
         historical_data=historical_data,
-        generation_time=generation_time
+        generation_time=generation_time,
+        # 新增图表数据
+        treemap_data=treemap_data,
+        streamgraph_data=streamgraph_data,
+        small_multiples_data=small_multiples_data
     )
     
     with open(output_file, 'w', encoding='utf-8') as f:

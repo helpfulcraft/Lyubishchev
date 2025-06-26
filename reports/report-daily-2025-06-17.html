@@ -336,11 +336,9 @@
     <div class="container">
         <h1>
             柳比歇夫时间统计报告 
-            {% if report_period %}
-            <span style="font-size: 0.7em; color: #555; vertical-align: middle;">- 周期报告 ({{ report_period }})</span>
-            {% elif report_date %}
-            <span style="font-size: 0.7em; color: #555; vertical-align: middle;">- {{ report_date }}</span>
-            {% endif %}
+            
+            <span style="font-size: 0.7em; color: #555; vertical-align: middle;">- 2025-06-17</span>
+            
         </h1>
 
         <!-- Card 1: Overview -->
@@ -348,35 +346,158 @@
             <h2>总览</h2>
             <div class="summary-grid">
                 <!-- Jinja2 loop for summary cards -->
-                {% for category in chart_data %}
-                <div class="summary-item" style="border-left-color: {{ category.itemStyle.color }};">
-                    <h3 onclick="toggleSummary('content-{{ loop.index }}')">
-                        <span>{{ category.name }}</span>
-                        <span class="total-time">{{ category.value_str }}</span>
+                
+                <div class="summary-item" style="border-left-color: #2ecc71;">
+                    <h3 onclick="toggleSummary('content-1')">
+                        <span>第二类</span>
+                        <span class="total-time">1h 9m</span>
                     </h3>
-                    <div class="collapsible-content" id="content-{{ loop.index }}">
-                        {% for subcategory in category.children %}
+                    <div class="collapsible-content" id="content-1">
+                        
                         <div class="subcategory">
-                            <span>{{ subcategory.name }}</span>
-                            <strong>{{ subcategory.value_str }}</strong>
+                            <span>折腾</span>
+                            <strong>13m</strong>
                         </div>
                         <div class="task-list">
-                            {% for task in subcategory.children %}
+                            
                             <div class="task-list-item">
-                                <span>{{ task.name }}</span>
-                                <strong>{{ task.time_str }}</strong>
+                                <span>readset上位</span>
+                                <strong>13m</strong>
                             </div>
-                            {% endfor %}
+                            
                         </div>
-                        {% endfor %}
+                        
+                        <div class="subcategory">
+                            <span>锻炼</span>
+                            <strong>51m</strong>
+                        </div>
+                        <div class="task-list">
+                            
+                            <div class="task-list-item">
+                                <span>节奏光剑</span>
+                                <strong>51m</strong>
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="subcategory">
+                            <span>冲浪</span>
+                            <strong>5m</strong>
+                        </div>
+                        <div class="task-list">
+                            
+                            <div class="task-list-item">
+                                <span>小黑盒</span>
+                                <strong>5m</strong>
+                            </div>
+                            
+                        </div>
+                        
                     </div>
                 </div>
-                {% endfor %}
+                
+                <div class="summary-item" style="border-left-color: #f1c40f;">
+                    <h3 onclick="toggleSummary('content-2')">
+                        <span>娱乐</span>
+                        <span class="total-time">10h 5m</span>
+                    </h3>
+                    <div class="collapsible-content" id="content-2">
+                        
+                        <div class="subcategory">
+                            <span>小说</span>
+                            <strong>1h 39m</strong>
+                        </div>
+                        <div class="task-list">
+                            
+                            <div class="task-list-item">
+                                <span>接手地府</span>
+                                <strong>32m</strong>
+                            </div>
+                            
+                            <div class="task-list-item">
+                                <span>惊涛落日</span>
+                                <strong>1h 7m</strong>
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="subcategory">
+                            <span>游戏</span>
+                            <strong>8h 26m</strong>
+                        </div>
+                        <div class="task-list">
+                            
+                            <div class="task-list-item">
+                                <span>er</span>
+                                <strong>8h 26m</strong>
+                            </div>
+                            
+                        </div>
+                        
+                    </div>
+                </div>
+                
+                <div class="summary-item" style="border-left-color: #e74c3c;">
+                    <h3 onclick="toggleSummary('content-3')">
+                        <span>杂项</span>
+                        <span class="total-time">3h 13m</span>
+                    </h3>
+                    <div class="collapsible-content" id="content-3">
+                        
+                        <div class="subcategory">
+                            <span>日常</span>
+                            <strong>2h 12m</strong>
+                        </div>
+                        <div class="task-list">
+                            
+                            <div class="task-list-item">
+                                <span>琐事</span>
+                                <strong>39m</strong>
+                            </div>
+                            
+                            <div class="task-list-item">
+                                <span>涩涩</span>
+                                <strong>1h 4m</strong>
+                            </div>
+                            
+                            <div class="task-list-item">
+                                <span>洗衣服</span>
+                                <strong>29m</strong>
+                            </div>
+                            
+                        </div>
+                        
+                        <div class="subcategory">
+                            <span>工程</span>
+                            <strong>1h 1m</strong>
+                        </div>
+                        <div class="task-list">
+                            
+                            <div class="task-list-item">
+                                <span>琐事</span>
+                                <strong>2m</strong>
+                            </div>
+                            
+                            <div class="task-list-item">
+                                <span>作业</span>
+                                <strong>25m</strong>
+                            </div>
+                            
+                            <div class="task-list-item">
+                                <span>儿童大世界</span>
+                                <strong>34m</strong>
+                            </div>
+                            
+                        </div>
+                        
+                    </div>
+                </div>
+                
 
                 <!-- Grand Total Card -->
                 <div class="summary-item" style="border-left-color: #7f8c8d;">
                     <h3>总计</h3>
-                    <div class="total-time">{{ data.daily_summary['总计'] }}</div>
+                    <div class="total-time">14h 27m</div>
                 </div>
             </div>
         </div>
@@ -401,24 +522,10 @@
         </div>
 
         <!-- Card 3: Historical Analysis -->
-        {% if historical_data and historical_data.dates and calendar_data and calendar_data|length > 0 %}
-        <div class="card">
-            <h2>历史趋势分析</h2>
-            <div class="chart-grid">
-                 <div class="chart-wrapper" style="grid-column: 1 / -1;">
-                     <h3>年度投入热力图</h3>
-                     <div id="calendarHeatmapContainer"></div>
-                 </div>
-                 <div class="chart-wrapper" style="grid-column: 1 / -1;">
-                    <h3>分类趋势 (堆叠面积图)</h3>
-                    <div class="chart-container" id="stackedAreaContainer" style="height: 400px;"></div>
-                </div>
-            </div>
-        </div>
-        {% endif %}
+        
 
         <div class="footer">
-            <p>报告生成于 {{ generation_time }}</p>
+            <p>报告生成于 2025-06-26 17:48:14</p>
         </div>
     </div>
 
@@ -459,10 +566,10 @@
         }
         
         // --- Data from Python (Now always the same variables) ---
-        const chartData = {{ chart_data | tojson }};
-        const pieData = {{ pie_data | tojson }};
-        const stackedBarData = {{ stacked_bar_data | tojson }};
-        const historicalData = {{ historical_data | tojson }};
+        const chartData = [{"children": [{"children": [{"name": "readset\u4e0a\u4f4d", "time_str": "13m", "value": 13}], "name": "\u6298\u817e", "value": 13, "value_str": "13m"}, {"children": [{"name": "\u8282\u594f\u5149\u5251", "time_str": "51m", "value": 51}], "name": "\u953b\u70bc", "value": 51, "value_str": "51m"}, {"children": [{"name": "\u5c0f\u9ed1\u76d2", "time_str": "5m", "value": 5}], "name": "\u51b2\u6d6a", "value": 5, "value_str": "5m"}], "itemStyle": {"color": "#2ecc71"}, "name": "\u7b2c\u4e8c\u7c7b", "value": 69, "value_str": "1h 9m"}, {"children": [{"children": [{"name": "\u63a5\u624b\u5730\u5e9c", "time_str": "32m", "value": 32}, {"name": "\u60ca\u6d9b\u843d\u65e5", "time_str": "1h 7m", "value": 67}], "name": "\u5c0f\u8bf4", "value": 99, "value_str": "1h 39m"}, {"children": [{"name": "er", "time_str": "8h 26m", "value": 506}], "name": "\u6e38\u620f", "value": 506, "value_str": "8h 26m"}], "itemStyle": {"color": "#f1c40f"}, "name": "\u5a31\u4e50", "value": 605, "value_str": "10h 5m"}, {"children": [{"children": [{"name": "\u7410\u4e8b", "time_str": "39m", "value": 39}, {"name": "\u6da9\u6da9", "time_str": "1h 4m", "value": 64}, {"name": "\u6d17\u8863\u670d", "time_str": "29m", "value": 29}], "name": "\u65e5\u5e38", "value": 132, "value_str": "2h 12m"}, {"children": [{"name": "\u7410\u4e8b", "time_str": "2m", "value": 2}, {"name": "\u4f5c\u4e1a", "time_str": "25m", "value": 25}, {"name": "\u513f\u7ae5\u5927\u4e16\u754c", "time_str": "34m", "value": 34}], "name": "\u5de5\u7a0b", "value": 61, "value_str": "1h 1m"}], "itemStyle": {"color": "#e74c3c"}, "name": "\u6742\u9879", "value": 193, "value_str": "3h 13m"}];
+        const pieData = [{"itemStyle": {"color": "#2ecc71"}, "name": "\u7b2c\u4e8c\u7c7b", "value": 69}, {"itemStyle": {"color": "#f1c40f"}, "name": "\u5a31\u4e50", "value": 605}, {"itemStyle": {"color": "#e74c3c"}, "name": "\u6742\u9879", "value": 193}];
+        const stackedBarData = {"legend": ["\u51b2\u6d6a", "\u5c0f\u8bf4", "\u5de5\u7a0b", "\u6298\u817e", "\u65e5\u5e38", "\u6e38\u620f", "\u953b\u70bc"], "series": [{"data": [5, 0, 0], "emphasis": {"focus": "series"}, "name": "\u51b2\u6d6a", "stack": "total", "type": "bar"}, {"data": [0, 99, 0], "emphasis": {"focus": "series"}, "name": "\u5c0f\u8bf4", "stack": "total", "type": "bar"}, {"data": [0, 0, 61], "emphasis": {"focus": "series"}, "name": "\u5de5\u7a0b", "stack": "total", "type": "bar"}, {"data": [13, 0, 0], "emphasis": {"focus": "series"}, "name": "\u6298\u817e", "stack": "total", "type": "bar"}, {"data": [0, 0, 132], "emphasis": {"focus": "series"}, "name": "\u65e5\u5e38", "stack": "total", "type": "bar"}, {"data": [0, 506, 0], "emphasis": {"focus": "series"}, "name": "\u6e38\u620f", "stack": "total", "type": "bar"}, {"data": [51, 0, 0], "emphasis": {"focus": "series"}, "name": "\u953b\u70bc", "stack": "total", "type": "bar"}], "yAxis": ["\u7b2c\u4e8c\u7c7b", "\u5a31\u4e50", "\u6742\u9879"]};
+        const historicalData = {"categories": ["\u5a31\u4e50", "\u6742\u9879", "\u6839\u6e90", "\u7b2c\u4e00\u7c7b", "\u7b2c\u4e8c\u7c7b"], "dates": ["2025-06-11", "2025-06-12", "2025-06-13", "2025-06-14", "2025-06-15", "2025-06-16", "2025-06-17", "2025-06-18", "2025-06-19", "2025-06-20", "2025-06-21", "2025-06-22", "2025-06-23", "2025-06-24", "2025-06-25"], "series": [{"data": [272.0, 382.0, 408.0, 287.0, 737.0, 546.0, 605.0, 201.0, 284.0, 416.0, 212.0, 233.0, 270.0, 168.0, 253.0], "name": "\u5a31\u4e50", "type": "line"}, {"data": [276.0, 199.0, 87.0, 72.0, 41.0, 92.0, 193.0, 159.0, 36.0, 193.0, 202.0, 421.0, 377.0, 213.0, 230.0], "name": "\u6742\u9879", "type": "line"}, {"data": [20.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 47.0, 407.0, 163.0, 210.0, 0.0, 83.0, 0.0, 0.0], "name": "\u6839\u6e90", "type": "line"}, {"data": [0.0, 0.0, 0.0, 162.0, 0.0, 107.0, 0.0, 0.0, 0.0, 0.0, 43.0, 80.0, 0.0, 28.0, 0.0], "name": "\u7b2c\u4e00\u7c7b", "type": "line"}, {"data": [267.0, 306.0, 390.0, 256.0, 58.0, 142.0, 69.0, 455.0, 159.0, 119.0, 178.0, 129.0, 80.0, 523.0, 454.0], "name": "\u7b2c\u4e8c\u7c7b", "type": "line"}]};
 
         // --- Chart Initialization ---
         function initCharts(theme = 'light') {
@@ -814,7 +921,7 @@
         }
 
         // --- 10. Treemap Chart ---
-        var treemapData = {{ treemap_data | tojson }};
+        var treemapData = [{"children": [{"children": [{"name": "readset\u4e0a\u4f4d", "time_str": "13m", "value": 13}], "name": "\u6298\u817e", "value": 13, "value_str": "13m"}, {"children": [{"name": "\u8282\u594f\u5149\u5251", "time_str": "51m", "value": 51}], "name": "\u953b\u70bc", "value": 51, "value_str": "51m"}, {"children": [{"name": "\u5c0f\u9ed1\u76d2", "time_str": "5m", "value": 5}], "name": "\u51b2\u6d6a", "value": 5, "value_str": "5m"}], "itemStyle": {"color": "#2ecc71"}, "name": "\u7b2c\u4e8c\u7c7b", "value": 69, "value_str": "1h 9m"}, {"children": [{"children": [{"name": "\u63a5\u624b\u5730\u5e9c", "time_str": "32m", "value": 32}, {"name": "\u60ca\u6d9b\u843d\u65e5", "time_str": "1h 7m", "value": 67}], "name": "\u5c0f\u8bf4", "value": 99, "value_str": "1h 39m"}, {"children": [{"name": "er", "time_str": "8h 26m", "value": 506}], "name": "\u6e38\u620f", "value": 506, "value_str": "8h 26m"}], "itemStyle": {"color": "#f1c40f"}, "name": "\u5a31\u4e50", "value": 605, "value_str": "10h 5m"}, {"children": [{"children": [{"name": "\u7410\u4e8b", "time_str": "39m", "value": 39}, {"name": "\u6da9\u6da9", "time_str": "1h 4m", "value": 64}, {"name": "\u6d17\u8863\u670d", "time_str": "29m", "value": 29}], "name": "\u65e5\u5e38", "value": 132, "value_str": "2h 12m"}, {"children": [{"name": "\u7410\u4e8b", "time_str": "2m", "value": 2}, {"name": "\u4f5c\u4e1a", "time_str": "25m", "value": 25}, {"name": "\u513f\u7ae5\u5927\u4e16\u754c", "time_str": "34m", "value": 34}], "name": "\u5de5\u7a0b", "value": 61, "value_str": "1h 1m"}], "itemStyle": {"color": "#e74c3c"}, "name": "\u6742\u9879", "value": 193, "value_str": "3h 13m"}];
         var treemapChartDom = document.getElementById('treemap-chart-container');
         if (treemapChartDom && treemapData) {
             var treemapChart = echarts.init(treemapChartDom, 'dark');
@@ -891,7 +998,7 @@
         }
 
         // --- 11. Streamgraph Chart ---
-        var streamgraphData = {{ streamgraph_data | tojson }};
+        var streamgraphData = {"categories": ["\u5a31\u4e50", "\u6742\u9879", "\u6839\u6e90", "\u7b2c\u4e00\u7c7b", "\u7b2c\u4e8c\u7c7b"], "dates": ["2025-06-11", "2025-06-12", "2025-06-13", "2025-06-14", "2025-06-15", "2025-06-16", "2025-06-17", "2025-06-18", "2025-06-19", "2025-06-20", "2025-06-21", "2025-06-22", "2025-06-23", "2025-06-24", "2025-06-25"], "series": [{"data": [272.0, 382.0, 408.0, 287.0, 737.0, 546.0, 605.0, 201.0, 284.0, 416.0, 212.0, 233.0, 270.0, 168.0, 253.0], "name": "\u5a31\u4e50", "type": "line"}, {"data": [276.0, 199.0, 87.0, 72.0, 41.0, 92.0, 193.0, 159.0, 36.0, 193.0, 202.0, 421.0, 377.0, 213.0, 230.0], "name": "\u6742\u9879", "type": "line"}, {"data": [20.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 47.0, 407.0, 163.0, 210.0, 0.0, 83.0, 0.0, 0.0], "name": "\u6839\u6e90", "type": "line"}, {"data": [0.0, 0.0, 0.0, 162.0, 0.0, 107.0, 0.0, 0.0, 0.0, 0.0, 43.0, 80.0, 0.0, 28.0, 0.0], "name": "\u7b2c\u4e00\u7c7b", "type": "line"}, {"data": [267.0, 306.0, 390.0, 256.0, 58.0, 142.0, 69.0, 455.0, 159.0, 119.0, 178.0, 129.0, 80.0, 523.0, 454.0], "name": "\u7b2c\u4e8c\u7c7b", "type": "line"}]};
         var streamgraphChartDom = document.getElementById('streamgraph-chart-container');
         if (streamgraphChartDom && streamgraphData) {
             var streamgraphChart = echarts.init(streamgraphChartDom, 'dark');
@@ -948,7 +1055,7 @@
         }
 
         // --- 12. Small Multiples ---
-        var smallMultiplesData = {{ small_multiples_data | tojson }};
+        var smallMultiplesData = {"categories": ["\u5a31\u4e50", "\u6742\u9879", "\u6839\u6e90", "\u7b2c\u4e00\u7c7b", "\u7b2c\u4e8c\u7c7b"], "dates": ["2025-06-11", "2025-06-12", "2025-06-13", "2025-06-14", "2025-06-15", "2025-06-16", "2025-06-17", "2025-06-18", "2025-06-19", "2025-06-20", "2025-06-21", "2025-06-22", "2025-06-23", "2025-06-24", "2025-06-25"], "series": [{"data": [272.0, 382.0, 408.0, 287.0, 737.0, 546.0, 605.0, 201.0, 284.0, 416.0, 212.0, 233.0, 270.0, 168.0, 253.0], "name": "\u5a31\u4e50", "type": "line"}, {"data": [276.0, 199.0, 87.0, 72.0, 41.0, 92.0, 193.0, 159.0, 36.0, 193.0, 202.0, 421.0, 377.0, 213.0, 230.0], "name": "\u6742\u9879", "type": "line"}, {"data": [20.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 47.0, 407.0, 163.0, 210.0, 0.0, 83.0, 0.0, 0.0], "name": "\u6839\u6e90", "type": "line"}, {"data": [0.0, 0.0, 0.0, 162.0, 0.0, 107.0, 0.0, 0.0, 0.0, 0.0, 43.0, 80.0, 0.0, 28.0, 0.0], "name": "\u7b2c\u4e00\u7c7b", "type": "line"}, {"data": [267.0, 306.0, 390.0, 256.0, 58.0, 142.0, 69.0, 455.0, 159.0, 119.0, 178.0, 129.0, 80.0, 523.0, 454.0], "name": "\u7b2c\u4e8c\u7c7b", "type": "line"}]};
         var smallMultiplesContainer = document.getElementById('small-multiples-container');
         if (smallMultiplesContainer && smallMultiplesData && smallMultiplesData.categories) {
             smallMultiplesData.categories.forEach((category, index) => {

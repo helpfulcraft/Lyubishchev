@@ -7,14 +7,14 @@ import sys
 import re
 import locale
 from tkcalendar import DateEntry
-from datetime import date
+from datetime import date, datetime
 
 def get_script_path():
     """获取脚本所在目录的绝对路径"""
     if getattr(sys, 'frozen', False):
         return os.path.dirname(sys.executable)
     else:
-        return os.path.dirname(os.path.abspath(__file__))
+        return os.path.dirname(os.path.realpath(sys.argv[0]))
 
 def open_file_in_browser(file_path):
     """在浏览器中打开指定的文件"""
@@ -23,16 +23,16 @@ def open_file_in_browser(file_path):
         return True
     return False
 
-def run_script(command_args, status_widget):
-    """通用脚本执行函数"""
+def run_script(command, status_label):
+    """通用函数，用于运行脚本并捕获输出。"""
     scripts_path = get_script_path()
     project_root = os.path.abspath(os.path.join(scripts_path, os.pardir))
     python_executable = sys.executable
     
-    command = [python_executable] + command_args
+    command = [python_executable] + command
     
     try:
-        status_widget.config(text="处理中，请稍候...", fg="blue")
+        status_label.config(text="处理中，请稍候...", fg="blue")
         window.update_idletasks()
 
         result = subprocess.run(
@@ -47,15 +47,15 @@ def run_script(command_args, status_widget):
 
     except subprocess.CalledProcessError as e:
         messagebox.showerror("执行错误", e.stderr)
-        status_widget.config(text="脚本执行失败，请查看错误弹窗。", fg="red")
+        status_label.config(text="脚本执行失败，请查看错误弹窗。", fg="red")
         return None
     except Exception as e:
         messagebox.showerror("未知错误", f"发生未知错误: {e}")
-        status_widget.config(text="发生未知错误，请查看错误弹窗。", fg="red")
+        status_label.config(text="发生未知错误，请查看错误弹窗。", fg="red")
         return None
 
 def generate_daily_report():
-    """处理并生成每日报告"""
+    """处理并生成每日报告，支持一次性处理多个日期。"""
     log_content = text_area.get("1.0", tk.END)
     if not log_content.strip():
         messagebox.showerror("错误", "日志内容不能为空！")
@@ -66,31 +66,90 @@ def generate_daily_report():
     project_root = os.path.abspath(os.path.join(scripts_path, os.pardir))
     log_file_path = os.path.join(project_root, 'data', 'log.md')
 
-    with open(log_file_path, "w", encoding="utf-8") as f:
-        f.write(log_content)
+    # 使用正则表达式按日期分割日志内容
+    # (^\s*##\s*\d{1,2}\.\d{1,2}\s*$)
+    # - ^: 匹配行首
+    # - \s*: 零或多个空白字符
+    # - ##: 字面量 "##"
+    # - \s*: 零或多个空白字符
+    # - \d{1,2}\.\d{1,2}: 月和日
+    # - \s*: 零或多个空白字符
+    # - $: 匹配行尾
+    # 括号将分隔符本身也包含在结果中
+    log_chunks_raw = re.split(r'(^\s*##\s*\d{1,2}\.\d{1,2}\s*$)', log_content, flags=re.MULTILINE)
+    
+    log_chunks = []
+    # 从1开始循环，因为第一个元素通常是空的（如果文本以日期开头）
+    for i in range(1, len(log_chunks_raw), 2):
+        # 将日期和其后的内容合并成一个块
+        date_header = log_chunks_raw[i]
+        content = log_chunks_raw[i+1] if (i+1) < len(log_chunks_raw) else ""
+        if date_header.strip() and content.strip():
+            log_chunks.append(date_header + content)
 
-    # Step 1: Process log file
-    process_output = run_script(['scripts/process_log.py'], status_label)
-    if process_output is None: return
-
-    # Step 2: Build report
-    build_output = run_script(['scripts/build_report.py'], status_label)
-    if build_output is None: return
-
-    # Extract filename from the build script's output
-    match = re.search(r"-->\s*(.*\.html)", build_output)
-    if match:
-        report_path = match.group(1).strip()
-        full_report_path = os.path.join(project_root, report_path)
-        if open_file_in_browser(full_report_path):
-            status_label.config(text=f"报告 '{os.path.basename(report_path)}' 已生成并打开！", fg="green")
-            messagebox.showinfo("成功", f"报告 '{os.path.basename(report_path)}' 已生成并成功在浏览器中打开！")
+    if not log_chunks:
+        # 如果没有找到任何日期标记，则将整个内容视为一个单独的报告
+        if log_content.strip():
+            log_chunks.append(log_content)
         else:
-            messagebox.showerror("错误", f"找不到生成的报告文件: {full_report_path}")
+            messagebox.showerror("错误", "未找到有效的日志内容或日期标记 (## 月.日)。")
+            return
+
+    generated_reports = []
+    total_chunks = len(log_chunks)
+
+    for i, chunk in enumerate(log_chunks):
+        status_label.config(text=f"正在处理第 {i+1}/{total_chunks} 份报告...", fg="blue")
+        window.update_idletasks() # 强制更新UI
+
+        with open(log_file_path, "w", encoding="utf-8") as f:
+            f.write(chunk)
+
+        # Step 1: Process log file
+        process_output = run_script([os.path.join(scripts_path, 'process_log.py')], status_label)
+        if process_output is None:
+            messagebox.showerror("处理失败", f"处理第 {i+1} 份报告时失败（process_log.py）。\n请检查控制台输出。")
+            continue
+
+        # Step 2: Build report
+        build_output = run_script([os.path.join(scripts_path, 'build_report.py')], status_label)
+        if build_output is None:
+            messagebox.showerror("生成失败", f"生成第 {i+1} 份报告时失败（build_report.py）。\n请检查控制台输出。")
+            continue
+
+        match = re.search(r"-->\s*(.*\.html)", build_output)
+        if match:
+            report_path = match.group(1).strip()
+            generated_reports.append(os.path.basename(report_path))
+        else:
+            messagebox.showwarning("警告", f"第 {i+1} 份报告已处理，但无法确定报告文件名。")
+            
+    if not generated_reports:
+        messagebox.showerror("完成", "处理完成，但没有生成任何报告。")
+        status_label.config(text="处理完成，但未生成报告。", fg="orange")
+        return
+
+    # --- 最终结果反馈 ---
+    final_message = f"成功生成 {len(generated_reports)} 份报告:\n\n" + "\n".join(generated_reports)
+    
+    if len(generated_reports) == 1:
+        # 如果只有一份报告，直接尝试打开它
+        full_report_path = os.path.join(project_root, 'reports', generated_reports[0])
+        if open_file_in_browser(full_report_path):
+            status_label.config(text=f"报告 '{generated_reports[0]}' 已生成并打开！", fg="green")
+            messagebox.showinfo("成功", f"报告 '{generated_reports[0]}' 已生成并成功在浏览器中打开！")
+        else:
+            messagebox.showerror("错误", f"已生成报告，但无法在浏览器中打开: {full_report_path}")
             status_label.config(text="错误：找不到报告文件。", fg="red")
     else:
-        messagebox.showerror("错误", "无法从脚本输出中找到报告文件名。")
-        status_label.config(text="错误：无法确定报告文件名。", fg="red")
+        # 如果有多份报告，提示用户并询问是否打开文件夹
+        status_label.config(text=f"成功生成 {len(generated_reports)} 份报告！", fg="green")
+        if messagebox.askyesno("全部完成", final_message + "\n\n是否打开报告所在的文件夹？"):
+            reports_dir = os.path.join(project_root, 'reports')
+            try:
+                os.startfile(reports_dir)
+            except AttributeError: # For non-windows OS
+                webbrowser.open(f"file:///{reports_dir}")
 
 def generate_periodic_report():
     """生成周期报告"""
@@ -115,8 +174,11 @@ def generate_periodic_report():
     scripts_path = get_script_path()
     project_root = os.path.abspath(os.path.join(scripts_path, os.pardir))
 
+    # 构建完整的脚本路径
+    command_with_full_path = [os.path.join(scripts_path, command_args[0])] + command_args[1:]
+
     # Run generation script
-    output = run_script(command_args, status_label)
+    output = run_script(command_with_full_path, status_label)
 
     if output:
         match = re.search(r"-->\s*(.*\.html)", output)
