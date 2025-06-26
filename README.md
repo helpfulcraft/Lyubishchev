@@ -1,91 +1,121 @@
-# 柳比歇夫时间统计报告生成器
+# 柳比歇夫时间统计法实践工具
 
-这是一个用于个人时间记录和分析的工具，灵感来源于柳比歇夫的时间统计法。它可以解析特定格式的每日日志，生成可视化的HTML报告，并对历史数据进行归档和周期性分析。
+这是一个基于Python的个人时间使用情况分析和报告生成工具，旨在实践亚历山大·柳比歇夫的时间统计法。通过记录每日的活动日志，本工具可以自动化地生成包含多种可视化图表的日度或周期性报告，帮助用户深入理解自己的时间分配模式。
 
 ## ✨ 功能特性
 
-- **图形化用户界面 (GUI)**: 提供一个简洁的GUI，用于生成每日和周期性报告。
-- **每日报告**: 解析形如 `log.md` 的日志文件，快速生成当日的时间花费报告。
-- **周期性报告**: 基于历史数据，一键生成周报、月报或最近7天的总结报告。
-- **数据可视化**: 通过饼图、旭日图和堆叠柱状图等多种图表，直观展示时间分配。
-- **历史数据追踪**: 自动将每日数据归档到 `historical_data.csv`，用于长期趋势分析。
-- **高度可定制**: 报告模板和颜色配置等均可在代码中轻松修改。
+- **日志解析**: 自动解析特定格式的文本日志，提取任务、项目和耗时。
+- **每日报告**: 生成详细的每日时间分配报告。
+- **周期性报告**: 支持按周、月或自定义时间段生成汇总报告。
+- **丰富的数据可视化**:
+    - **总览卡片**: 直观展示各主类的总耗时。
+    - **饼图**: 展示各主类时间分配的百分比。
+    - **堆叠柱状图**: 清晰展示各主类下，不同子项的时间构成。
+    - **旭日图**: 交互式地探索从主类到具体任务的时间分配层次。
+    - **历史趋势图**: 以折线图展示各项活动随时间的变化趋势。
+    - **图表库**: 提供额外的图表来探索数据，包括：
+        - **Treemap**: 从另一维度展示时间块的层次结构。
+        - **Streamgraph (流图)**: 优雅地展示各项活动耗时随时间的流动变化。
+        - **Small Multiples**: 将不同类别的时间趋势拆分为多个迷你图表，便于分别观察和对比。
+- **明暗主题切换**: 报告页面支持一键切换浅色和深色主题。
+- **跨平台GUI**: 提供一个简单的图形用户界面 (`run_app.py`) 来粘贴日志、生成和查看报告。
 
-## 🚀 如何开始
+## 🛠️ 技术栈
 
-### 主要用法 (推荐)
+- **后端**: Python 3
+- **数据处理**: Pandas
+- **HTML模板**: Jinja2
+- **可视化库**: Apache ECharts
+- **GUI**: Tkinter (Python内置)
 
-直接双击运行根目录下的 `run_gui.bat` 文件。
+## 🚀 如何使用
 
-> **提示**: 你可以为 `run_gui.bat` 创建一个桌面快捷方式，方便每日使用。
+### 1. 环境准备
 
-程序启动后，你将看到一个带两个标签页的窗口：
+确保您的环境中已安装 Python 3 和 Pip。
 
-1.  **每日报告**:
-    *   在文本框中粘贴你当天的日志内容。
-    *   点击 "一键生成每日报告" 按钮。
-    *   程序会自动处理你的日志，生成报告，并用默认浏览器打开。
+### 2. 安装依赖
 
-2.  **周期报告**:
-    *   选择你想要的报告周期（本周、本月、最近7天）。
-    *   点击 "生成周期报告" 按钮。
-    *   程序会根据历史数据生成对应的周期报告，并自动打开。
+本项目依赖 `pandas` 和 `jinja2`。通过以下命令安装：
 
-### 目录结构
+```bash
+pip install pandas jinja2
+```
+
+### 3. 记录日志
+
+在 `data/log.md` 文件中，按照以下格式记录您的每日时间日志。新的一天从 `## YYYY-MM-DD` 开始。
+
+```markdown
+## 2025-06-13
+
+### 第一类
+- 子项A: 1h 30m
+  - 具体任务1
+  - 具体任务2
+- 子项B: 45m
+  - 具体任务3
+
+### 第二类
+- 子项C: 2h
+  - 具体任务4
+
+### 娱乐
+- 子项D: 2h
+  - 具体任务5
+```
+
+### 4. 生成报告
+
+有多种方式可以生成报告：
+
+- **使用GUI (推荐)**:
+  直接运行 `run_app.py`，这会打开一个图形界面。您可以将日志内容粘贴进去，然后点击按钮生成和查看报告。
+  ```bash
+  python scripts/run_app.py
+  ```
+
+- **通过命令行生成每日报告**:
+  运行 `process_log.py` 来处理 `data/log.md` 中的最新一天日志，并生成 `data/summary.json`。
+  ```bash
+  python scripts/process_log.py
+  ```
+  然后运行 `build_report.py` 来根据 `summary.json` 生成HTML报告。
+  ```bash
+  python scripts/build_report.py
+  ```
+
+- **通过命令行生成周期性报告**:
+  运行 `generate_periodic_report.py` 并指定周期。
+  ```bash
+  # 生成本周报告
+  python scripts/generate_periodic_report.py --period week
+
+  # 生成最近7天报告
+  python scripts/generate_periodic_report.py --period last7days
+
+  # 生成自定义时间段报告
+  python scripts/generate_periodic_report.py --start 2025-06-01 --end 2025-06-15
+  ```
+
+所有生成的报告将保存在 `reports` 文件夹下。
+
+## 📁 项目结构
 
 ```
 .
-├── cmd_scripts/          <-- 存放命令行批处理脚本
-│   ├── run_daily_from_log.bat
-│   └── run_periodic_report.bat
-│
-├── data/                 <-- 存放原始数据和处理后的数据
-│   ├── historical_data.csv
-│   └── log.md
-│
-├── reports/              <-- 所有生成的HTML报告都存放在这里
-│
-├── scripts/              <-- 核心Python脚本
-│   ├── build_report.py
-│   ├── generate_periodic_report.py
-│   ├── process_log.py
-│   └── run_app.py
-│
-├── templates/            <-- HTML报告的Jinja2模板
-│   └── new_report_template.html
-│
-└── run_gui.bat           <-- GUI启动器 (主要入口)
+├── .gitignore          # Git忽略文件配置
+├── data/
+│   ├── historical_data.csv # 所有活动的历史记录
+│   ├── log.md            # 每日活动日志源文件
+│   └── summary.json      # 单日日志处理后的摘要
+├── reports/
+│   └── ...               # 生成的HTML报告存放处
+├── scripts/
+│   ├── build_report.py   # 从summary.json生成每日报告
+│   ├── generate_periodic_report.py # 生成周期性报告
+│   ├── process_log.py    # 解析log.md并生成summary.json
+│   └── run_app.py        # GUI应用程序入口
+└── templates/
+    └── new_report_template.html # 报告的HTML模板
 ```
-
-### 进阶用法 (命令行)
-
-对于熟悉命令行的用户，`cmd_scripts` 目录下提供了两个脚本用于自动化：
-
--   `run_daily_from_log.bat`: 从 `data/log.md` 文件直接生成每日报告，不会打开GUI。
--   `run_periodic_report.bat [period]`: 生成周期报告。`[period]` 可以是 `week`, `month`, 或 `last7days`。例如:
-    ```bash
-    # 在 cmd_scripts 目录中运行
-    run_periodic_report.bat month
-    ```
-
-## 📝 日志格式
-
-程序依赖 `data/log.md` 中的特定格式。请确保你的日志遵循以下示例：
-
-```markdown
-## 6.18
-
-一、杂项
-- 日常（琐事1h 20m）
-- 工程（写代码3h 45m+15m）
-
-二、第二类
-- 锻炼（跑步30m）
-- 学习（阅读源码1h）
-```
-
-- 日期格式为 `## 月.日`。
-- 使用 `-` 和 `、` 来定义主分类。
-- 使用嵌套的 `-` 和 `()` 来定义子分类和任务。
-- 时间格式为 `Xh` 或 `Ym` 或 `Xh Ym`。
-- 可以用 `+` 来连接同一任务的多个时间段。 
