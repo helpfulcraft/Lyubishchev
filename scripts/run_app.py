@@ -159,7 +159,7 @@ def generate_periodic_report():
         messagebox.showerror("错误", "请选择一个报告周期！")
         return
 
-    command_args = ['scripts/generate_periodic_report.py']
+    command_args = ['generate_periodic_report.py']
     
     if period == 'custom':
         start_date = start_date_entry.get_date()
