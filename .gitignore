@@ -1,3 +1,8 @@
-report/
-data/
+# 忽略 reports 文件夹下的所有文件
+reports/*
+
+# 但是，不要忽略这一个特定的报告文件
+!reports/report-daily-2025-06-13.html
+
+# 之前忽略 .README.md 的规则
 .README.md
